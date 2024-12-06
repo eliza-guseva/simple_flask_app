@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask + HTMX</title>
+    <script src="https://unpkg.com/htmx.org"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff5eb;
+            color: #2c1810;
+        }
+
+        h1 {
+            color: #8b4513;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #deb887;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #d2691e;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #a0522d;
+        }
+
+        #message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 5px solid #3c763d;
+        }
+
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 5px solid #a94442;
+        }
+
+        .htmx-request .button-text {
+            display: none;
+        }
+        
+        .htmx-request .loader {
+            display: inline-block !important;
+        }
+        
+        .progress-message {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Customer Satisfaction Predictor</h1>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <p>1. First, upload your training dataset:</p>
+        <form hx-post="/upload_train" hx-target="#message" enctype="multipart/form-data">
+            <input type="file" name="file" required accept=".csv">
+            <button type="submit">Upload Training Data</button>
+        </form>
+        
+        <p style="margin-top: 30px;">2. Then, train the model:</p>
+        <form hx-post="/train" hx-target="#message">
+            <button type="submit">
+                <span class="button-text">Train Model</span>
+                <span class="loader" style="display: none;">Training...</span>
+            </button>
+        </form>
+        <div id="message"></div>
+        <script>
+            const eventSource = new EventSource('/progress');
+            eventSource.onmessage = function(event) {
+                const messageDiv = document.getElementById('message');
+                messageDiv.innerHTML = `<div class='progress-message'>${event.data}</div>`;
+            };
+        </script>
+
+        <p style="margin-top: 30px;">3. Finally, upload test data for predictions:</p>
+        <form hx-post="/upload_test" hx-target="#message" enctype="multipart/form-data">
+            <input type="file" name="file" required accept=".csv">
+            <button type="submit">Upload Test Data & Predict</button>
+        </form>
+    </div>
+    
+    
+</body>
+</html>
